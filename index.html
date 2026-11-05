@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Minecraft Chill Hub</title>
+<style>
+:root{--bg:#0d1117;--card:#161c26;--card2:#1d2532;--tx:#e8eef7;--mu:#8b98ab;--ac:#4ade80;--ac2:#38bdf8;--bd:#2a3445;box-sizing:border-box}
+@media(prefers-color-scheme:light){:root:not([data-theme=dark]){--bg:#f3f6fb;--card:#fff;--card2:#eaf0f8;--tx:#16202e;--mu:#5b6778;--bd:#d5deea}}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:radial-gradient(900px 500px at 85% -10%,rgba(74,222,128,.12),transparent),radial-gradient(700px 400px at 0 0,rgba(56,189,248,.1),transparent),var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+button,input{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:10px;padding:12px 16px;max-width:1280px;margin:0 auto}
+header b{font-size:18px;flex:1;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn,.chip{border:1px solid var(--bd);background:var(--card);border-radius:12px;padding:7px 13px;cursor:pointer;white-space:nowrap;transition:.2s}
+.btn:hover,.chip:hover{border-color:var(--ac);box-shadow:0 0 12px rgba(74,222,128,.25)}
+.btn.pri{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#06210f;border-color:transparent;font-weight:600}
+.chip{border-radius:20px;padding:4px 11px;font-size:13px}.chip.on{border-color:var(--ac);color:var(--ac)}
+.frame{max-width:1280px;margin:0 auto 24px;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px;border:1px solid var(--bd);border-radius:22px;background:color-mix(in srgb,var(--card) 50%,transparent)}
+@media(max-width:900px){.frame{grid-template-columns:1fr;margin:0 8px 24px}}
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;min-width:0}
+.panel h2{margin:0 0 2px;font-size:19px}.mu{color:var(--mu);font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.stage{position:relative;width:min(100%,460px);margin:0 auto}
+#cv{width:100%;aspect-ratio:1;border-radius:14px;background:var(--card2);touch-action:manipulation;cursor:pointer;display:block}
+.ov{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.6);border-radius:14px;font-size:22px;color:#fff}
+.pl{aspect-ratio:16/9;border-radius:12px;background:#000;display:grid;place-items:center;color:#8b98ab;overflow:hidden;position:relative}
+iframe{width:100%;height:100%;border:0}
+input{background:var(--card2);border:1px solid var(--bd);border-radius:12px;padding:8px 12px;width:100%}
+#list{max-height:300px;overflow:auto;display:grid;gap:6px}
+.it{display:flex;gap:10px;align-items:center;padding:6px;border-radius:12px;background:var(--card2);border:1px solid transparent;cursor:pointer}
+.it:hover,.it.on{border-color:var(--ac)}
+.tile{flex:none;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;color:#fff}
+.it div{min-width:0;flex:1}.it b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fv{background:none;border:0;cursor:pointer;font-size:18px}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.7);display:none;place-items:center;padding:16px}.modal.on{display:grid}
+.mb{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px;max-width:420px;width:100%}
+label{display:flex;gap:8px;align-items:center;margin:8px 0}
+#welcome{position:fixed;inset:0;z-index:30;display:grid;place-items:center;text-align:center;background:var(--bg);transition:opacity .5s}
+.cube{width:56px;height:56px;margin:0 auto 18px;border-radius:10px;background:linear-gradient(135deg,var(--ac),var(--ac2));animation:sp 2s ease-in-out infinite}
+@keyframes sp{50%{transform:rotate(90deg) scale(.8);border-radius:24px}}
+.panel{animation:in .5s ease}@keyframes in{from{opacity:0;transform:translateY(10px)}}
+</style>
+</head>
+<body>
+<div id="welcome"><div><div class="cube"></div><h1>Minecraft Chill Hub</h1><p class="mu">A calm game and 50+ Minecraft films, side by side.</p><button class="btn pri" id="enter">Enter</button></div></div>
+<header>
+  <b>⛏ Minecraft Chill Hub</b>
+  <button class="btn pri" id="addB">➕ Add Video</button>
+  <button class="btn" id="setB">⚙ Settings</button>
+</header>
+<div class="frame">
+<section class="panel" id="gameP">
+  <h2>🎮 Game Screen</h2>
+  <div class="mu">Tap 2+ touching blocks of one color to pop them. No timer.</div>
+  <div class="row"><b>Score <span id="sc">0</span></b><span class="mu">Best <span id="bs">0</span></span>
+  <button class="btn" id="gPause">Pause</button><button class="btn" id="gRe">Restart</button><button class="btn" id="gMute"></button></div>
+  <div class="stage"><canvas id="cv" width="460" height="460"></canvas><div class="ov" id="gOv">Paused</div></div>
+</section>
+
+<section class="panel" id="filmP">
+  <h2>🎬 Film Screen</h2>
+  <div class="pl" id="pl"><span>Pick a Minecraft film below</span></div>
+  <div class="row" id="pi" style="display:none">
+    <div style="flex:1;min-width:0"><b id="pt"></b><div class="mu" id="pm"></div></div>
+    <button class="btn" id="pf"></button>
+  </div>
+  <div class="row"><input id="q" placeholder="Search films…" style="flex:1"><button class="btn" id="rand">🎲 Random</button><button class="btn" id="shuf">🔀 Shuffle</button></div>
+  <div class="row" id="chips"></div>
+  <div id="list"></div>
+</section>
+</div>
+
+<!-- Add Video Modal -->
+<div class="modal" id="addMd">
+  <div class="mb">
+    <h2 style="margin-top:0">Add Minecraft Video</h2>
+    <p class="mu">Paste a YouTube URL or Video ID below:</p>
+    <input id="addUrl" placeholder="https://www.youtube.com/watch?v=..." style="margin-bottom:10px">
+    <input id="addTitle" placeholder="Video Title (Optional)" style="margin-bottom:10px">
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn" id="addCancel">Cancel</button>
+      <button class="btn pri" id="addSave">Add Film</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal" id="md">
+  <div class="mb">
+    <h2 style="margin-top:0">Settings</h2>
+    <label><input type="checkbox" id="sSnd" style="width:auto"> Game sounds</label>
+    <label><input type="checkbox" id="sDark" style="width:auto"> Force dark theme</label>
+    <div class="row"><button class="btn" id="cHist">Clear watch history</button><button class="btn" id="cFav">Clear favorites</button><button class="btn" id="cBest">Reset best score</button></div>
+    <button class="btn pri" id="mx">Close</button>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const ld=(k,d)=>{try{const v=localStorage.getItem('mch_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem('mch_'+k,JSON.stringify(v))}catch(e){}};
+
+/* 52 Minecraft-Only Films */
+const defaultFilms=[
+['RUUdY1aAO5I','Salt: Minecraft Cinematic Short Film','Element Animation','Cinematic'],
+['WCSi3g9Ly8w','This A MINECRAFT Movie is BETTER Than the Real One','CraftyFX','Cinematic'],
+['9bPvTPi8xdU','Pixel Passion: Minecraft Live Action Movie','Black Plasma','Cinematic'],
+['U3G2-qb1-AU','Minecraft: Movie Edition (Fan Movie Trailer)','Flash Films','Cinematic'],
+['5hkqw0p8kFI','Here In the Nether: Minecraft Fan Film','DerpBox','Cinematic'],
+['SrSzRbsxbNg','The Shrine: A Cinematic Minecraft Short Film','Zane','Cinematic'],
+['GQ_Ns56U3So','Steve VS Steve / Movie VS Game: Minecraft Short','AnimationX','Cinematic'],
+['12T5jJ-PbGs','Harvest Day: A Minecraft Story','Creative Community','Cinematic'],
+['8FIFDXvDAq8','Minecraft The Movie (Machinima)','ExplodingTNT','Story'],
+['BMBtL5-cAu0','My Minecraft Movie (The Way It Should Be)','Bionic','Story'],
+['2GNdPzQncn0','Death of a Dream (A Minecraft Comedy Movie)','BlueMonkey','Story'],
+['I-iqOKKIrik','I Created a Minecraft Cinematic Universe','Wisp','Story'],
+['Pl40mE8rXm8','Minecraft Story Mode Episode 1 (Full Movie)','Telltale','Story'],
+['MNlq3SA2hgs','THE CREAKING: A Minecraft Horror Fan Film','Minecraft Shorts','Horror'],
+['s-t3czkbbyI','The Bellringer (Minecraft Horror Movie)','Rainimator','Horror'],
+['hny7mhRHjTE','The Cave: A Minecraft Horror Film','GamerMovie','Horror'],
+['ullCygtPgAo','The Haunted Basement: Minecraft Scary Movie','MachinimaStudio','Horror'],
+['apk9Azubhj4','Animation Life: Episode 1','Black Plasma Studios','Animation'],
+['nFQKvjM9HCw','Animation Life: FULL MOVIE','Squared Media','Animation'],
+['vFwJ4z8oI7w','Zombie Apocalypse: FULL MOVIE','Squared Media','Animation'],
+['yRqoy-L4TSA','Worlds Apart: FULL MOVIE','Rainimator','Animation'],
+['x3Ab9XVXadY','JJ & Mikey: The Complete Story','Monster School','Animation'],
+['SBtS-n1j4U4','Technoblade Never Dies: FULL MOVIE','SAD-ist','Animation'],
+['6y34cutYcEc','Animation vs. Minecraft: FULL MOVIE (Ep 1-36)','Alan Becker','Animation'],
+['CfqlGBmSBQY','Villager VS Pillager: A History','DarkOakAnimations','Animation'],
+['mNkD2M_rQlg','Minecraft Takes the Red Pill (Matrix Animation)','hbrunav','Animation'],
+['gm4SIjY-8Y4','Minecraft’s MOST Viewed Animation','Element Animation','Animation'],
+['JfPG0unxjXY','Building The ULTIMATE DWARF Empire: 1000 Days','Luke TheNotable','Survival'],
+['S_koGAGifMo','I Survived 1000 Days in Minecraft Hardcore','Luke TheNotable','Survival'],
+['SUcUi3fEOa8','I Survived 2000 Days in Hardcore Minecraft','Luke TheNotable','Survival'],
+['ZSMGxM7ZplU','I Survived 1500 Days in Hardcore Minecraft','Forgelabs','Survival'],
+['9WZoFiJEGUg','I Survived 6000 Days in Minecraft Hardcore','Luke TheNotable','Survival'],
+['N1TxYa4rWr8','I Survived 7000 DAYS in Minecraft Hardcore','Luke TheNotable','Survival'],
+['s0dLAjtLlDQ','I Survived 8000 Days in Minecraft Hardcore','Luke TheNotable','Survival'],
+['wZkLyiviBR4','I Survived Days ON A RAFT in Minecraft','MattShea','Survival'],
+['mPYaBf94_Dk','WITCH FIGHT: A Minecraft Fan Film','Live Action MC','Adventure'],
+['SYtNRzbyp-k','Hardcore Minecraft’s Ultimate Adventure','Socksfor1','Adventure'],
+['S4sOmm50kjk','Minecraft Just Create SMP 2: Full Movie','CreateStudio','Adventure'],
+['kbeicIbjwj4','Minecraft Just Create SMP MOVIE','CreateStudio','Adventure'],
+['u4Jz5yVTviU','Minecraft Create Mod 6 MOVIE','CreateStudio','Adventure'],
+['byN8FJqhob4','1,000,000 Villagers Vs FOLK VALLEY','PillagerFilms','Adventure'],
+['KaA70hCX1PQ','1,000,000 Villagers VS VERITY','PillagerFilms','Adventure'],
+['_OlOdaEw-44','Minecraft: THE GREAT WAR of Villagers','PillagerFilms','Adventure'],
+['cQbPQCWdHTA','1,000,000 Villagers Simulate The MINECRAFT MOVIE','PillagerFilms','Adventure'],
+['lklbHHuoa5o','Kings SMP: The Full Story','DreamSMP','Roleplay'],
+['gzMcb2HNI7A','Minecraft but I become the RICHEST PLAYER','Aphmau','Roleplay'],
+['0HBL3O6CSjc','Minecraft Demon Slayer SMP (THE MOVIE)','TommyInnit','Roleplay'],
+['ZshOAcmHrBs','Minecraft Steve and the Villager','ExplodingTNT','Roleplay'],
+['YoVohRDyhf8','Minecraft but I survive in VILLAGER CIVILIZATION','Aphmau','Roleplay'],
+['Cm7VyN8DnUw','How We SAVED An ENTIRE Village From Disaster','Aphmau','Roleplay'],
+['dQw4w9WgXcQ','Minecraft Herobrine Origin Story','Minecraft Community','Story'],
+['L_LUpnjgPso','Minecraft Ender Dragon Movie','Black Plasma','Cinematic']
+].map(a=>({id:a[0],title:a[1],ch:a[2],cat:a[3]}));
+
+let customFilms = ld('custom_films', []);
+let D = [...defaultFilms, ...customFilms];
+
+let favs=ld('favs',[]),hist=ld('hist',[]),cat='All',cur=null,order=null;
+const by=id=>D.find(m=>m.id===id),hue=id=>[...id].reduce((a,c)=>a+c.charCodeAt(0),0)%360;
+
+function load(id,auto){
+  const m=by(id);if(!m)return;cur=id;
+  const origin = window.location.origin || 'http://localhost';
+  
+  // Directly load iframe inside the site player frame with proper embed API flags
+  $('#pl').innerHTML=`<iframe 
+    src="https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1&rel=0&origin=${encodeURIComponent(origin)}" 
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen 
+    title="${m.title.replace(/"/g,'')}">
+  </iframe>`;
+  
+  $('#pi').style.display='flex';
+  $('#pt').textContent=m.title;
+  $('#pm').textContent=(m.ch||'YouTube')+' · '+m.cat;
+  
+  if(auto){
+    hist=[id,...hist.filter(x=>x!==id)].slice(0,25);
+    sv('hist',hist);
+  }
+  rf();render();
+}
+
+function rf(){$('#pf').textContent=favs.includes(cur)?'♥ Saved':'♡ Save'}
+function tog(id){favs=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];sv('favs',favs);rf();render()}
+$('#pf').onclick=()=>cur&&tog(cur);
+
+function render(){
+  const q=$('#q').value.toLowerCase();
+  $('#chips').innerHTML='';
+  ['All','♥ Favorites','Recent','Cinematic','Story','Animation','Survival','Horror','Adventure','Roleplay'].forEach(c=>{
+    const b=document.createElement('button');
+    b.className='chip'+(c===cat?' on':'');
+    b.textContent=c;
+    b.onclick=()=>{cat=c;order=null;render()};
+    $('#chips').appendChild(b);
+  });
+  
+  let l=cat==='♥ Favorites'?favs.map(by):cat==='Recent'?hist.map(by):D.filter(m=>cat==='All'||m.cat===cat);
+  l=l.filter(m=>m&&(m.title+m.ch).toLowerCase().includes(q));
+  if(order)l=order.map(by).filter(m=>l.includes(m));
+  
+  const L=$('#list');L.innerHTML='';
+  if(!l.length)L.innerHTML='<div class="mu">No videos found.</div>';
+  
+  l.forEach(m=>{
+    const d=document.createElement('div');
+    d.className='it'+(m.id===cur?' on':'');
+    d.innerHTML=`<div class="tile" style="background:linear-gradient(135deg,hsl(${hue(m.id)},55%,36%),hsl(${(hue(m.id)+60)%360},60%,24%))">▶</div><div><b></b><span class="mu"></span></div><button class="fv"></button>`;
+    d.querySelector('b').textContent=m.title;
+    d.querySelector('span').textContent=(m.ch||'YouTube')+' · '+m.cat;
+    const f=d.querySelector('.fv');
+    f.textContent=favs.includes(m.id)?'♥':'♡';
+    f.onclick=e=>{e.stopPropagation();tog(m.id)};
+    d.onclick=()=>load(m.id,true);
+    L.appendChild(d);
+  });
+}
+
+$('#q').oninput=render;
+$('#rand').onclick=()=>load(D[Math.floor(Math.random()*D.length)].id,true);
+$('#shuf').onclick=()=>{cat='All';order=D.map(m=>m.id).sort(()=>Math.random()-.5);render()};
+
+/* Add Video Logic */
+$('#addB').onclick=()=>$('#addMd').classList.add('on');
+$('#addCancel').onclick=()=>$('#addMd').classList.remove('on');
+$('#addSave').onclick=()=>{
+  const raw=$('#addUrl').value.trim();
+  const title=$('#addTitle').value.trim()||'User Added Minecraft Film';
+  let id='';
+  if(raw.includes('v=')){
+    id=raw.split('v=')[1].split('&')[0];
+  }else if(raw.includes('youtu.be/')){
+    id=raw.split('youtu.be/')[1].split('?')[0];
+  }else{
+    id=raw;
+  }
+  if(id.length>=5){
+    const newFilm={id,title,ch:'Custom Upload',cat:'Cinematic'};
+    customFilms.push(newFilm);
+    D.push(newFilm);
+    sv('custom_films',customFilms);
+    $('#addUrl').value='';
+    $('#addTitle').value='';
+    $('#addMd').classList.remove('on');
+    render();
+    load(id,true);
+  }else{
+    alert('Please enter a valid YouTube URL or Video ID.');
+  }
+};
+
+/* Settings */
+let snd=ld('snd',true);const ss=()=>{$('#gMute').textContent=snd?'🔊 Sound on':'🔇 Muted';$('#sSnd').checked=snd;sv('snd',snd)};
+$('#gMute').onclick=()=>{snd=!snd;ss()};$('#sSnd').onchange=e=>{snd=e.target.checked;ss()};
+$('#setB').onclick=()=>$('#md').classList.add('on');$('#mx').onclick=()=>$('#md').classList.remove('on');
+$('#md').onclick=e=>{if(e.target.id==='md')$('#md').classList.remove('on')};
+$('#sDark').checked=ld('dark',false);const dk=()=>document.documentElement.dataset.theme=$('#sDark').checked?'dark':'';dk();
+$('#sDark').onchange=()=>{sv('dark',$('#sDark').checked);dk()};
+$('#cHist').onclick=()=>{hist=[];sv('hist',hist);render()};$('#cFav').onclick=()=>{favs=[];sv('favs',favs);rf();render()};
+$('#cBest').onclick=()=>{best=0;sv('best',0);$('#bs').textContent=0};
+$('#enter').onclick=()=>{$('#welcome').style.opacity=0;setTimeout(()=>$('#welcome').remove(),500)};
+
+/* Game */
+const N=10,CS=46,COL=['#4ade80','#38bdf8','#f472b6','#fbbf24','#a78bfa'];
+const cv=$('#cv'),cx=cv.getContext('2d');let g,score,best=ld('best',0),paused=false,parts=[],ac;
+function tone(f,d){if(!snd)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),v=ac.createGain();o.frequency.value=f;v.gain.setValueAtTime(.12,ac.currentTime);v.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.connect(v);v.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+function reset(){g=Array.from({length:N},()=>Array.from({length:N},()=>Math.floor(Math.random()*5)));score=0;parts=[];$('#sc').textContent=0;$('#bs').textContent=best;pause(false)}
+function pause(p){paused=p;$('#gOv').style.display=p?'grid':'none';$('#gPause').textContent=p?'Resume':'Pause'}
+$('#gPause').onclick=()=>pause(!paused);$('#gRe').onclick=reset;
+cv.onclick=e=>{if(paused)return;const r=cv.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/r.width*N),y=Math.floor((e.clientY-r.top)/r.height*N);
+const c=g[y]&&g[y][x];if(c==null)return;const seen=new Set([y*N+x]),st=[[y,x]];
+while(st.length){const[a,b]=st.pop();[[1,0],[-1,0],[0,1],[0,-1]].forEach(([da,db])=>{const na=a+da,nb=b+db;if(g[na]&&g[na][nb]===c&&!seen.has(na*N+nb)){seen.add(na*N+nb);st.push([na,nb])}})}
+if(seen.size<2){tone(160,.15);return}
+seen.forEach(k=>{const a=Math.floor(k/N),b=k%N;g[a][b]=-1;for(let i=0;i<5;i++)parts.push({x:(b+.5)*CS,y:(a+.5)*CS,vx:(Math.random()-.5)*4,vy:-Math.random()*4,l:1,c:COL[c]})});
+for(let b=0;b<N;b++){const col=[];for(let a=N-1;a>=0;a--)if(g[a][b]>=0)col.push(g[a][b]);while(col.length<N)col.push(Math.floor(Math.random()*5));for(let a=N-1;a>=0;a--)g[a][b]=col[N-1-a]}
+score+=seen.size*seen.size;tone(300+Math.min(seen.size,12)*50,.25);$('#sc').textContent=score;if(score>best){best=score;sv('best',best);$('#bs').textContent=best}};
+function draw(){cx.clearRect(0,0,460,460);for(let a=0;a<N;a++)for(let b=0;b<N;b++){cx.fillStyle=COL[g[a][b]];cx.beginPath();cx.roundRect(b*CS+2,a*CS+2,CS-4,CS-4,8);cx.fill()}
+parts=parts.filter(p=>p.l>0);parts.forEach(p=>{if(!paused){p.x+=p.vx;p.y+=p.vy;p.vy+=.2;p.l-=.03}cx.globalAlpha=Math.max(p.l,0);cx.fillStyle=p.c;cx.fillRect(p.x,p.y,6,6)});cx.globalAlpha=1;requestAnimationFrame(draw)}
+ss();reset();draw();render();if(hist[0])load(hist[0],false);
+</script>
+</body>
+</html>
